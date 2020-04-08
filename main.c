@@ -528,8 +528,8 @@ int main(void){
         }
         
         // Erases player
-        //clear_player(player.x, player.y, player.x_size, player.y_size, 3);
-        clear_screen();
+        clear_player(player.x, player.y, player.x_size, player.y_size, 3);
+
         //updates new player direction
         player.y += player.y_dir;
         player.x += player.x_dir;
@@ -537,6 +537,7 @@ int main(void){
         draw_player(player.x, player.y, player.x_size, player.y_size, 0);
 
         head = spawn_obstacle(head);
+        //clear_bg(head);
         head = draw_obstacle(head);
 
         gameOver = collision(player);
@@ -550,19 +551,45 @@ int main(void){
 //forwards player collision detection using color detection
 bool collision(struct Player player)
 {
-    for (int x = player.x; x < player.x + player.x_size + 5; x++) 
-    {
-        for(int y = player.y; y < player.y + player.y_size + 5; y++)
+    int i = player.x;
+    int j = player.y;
+
+    for (int k = 0 ; k < 75 * 45 * 2 - 1; k+= 2) {
+        if (!(Shark_map[k] == 0x00 && Shark_map[k+1] == 0x00)){
+                continue;
+        }
+        if (!(Character_map[k] == 0x00 && Character_map[k+1] == 0x00)){
+                continue;
+        }
+
+        int red = ((Shark_map[k + 1] & 0xF8) >> 3) << 11;
+        int green  = (((Shark_map[k] & 0xE0) >> 5)) | ((Shark_map[k+1] & 0x7) << 3) ;		                
+        int blue = (Shark_map[k] & 0x1f);
+            
+        short int p = red | ( (green << 5) | blue);
+
+        if( *(short int *)(pixel_buffer_start + (j << 10) + (i << 1)) == p)
         {
-            if( *(short int *)(pixel_buffer_start + (y << 10) + (x << 1)) != 0x001F)
-            {
-                printf("Oh no, we hit something \n");
-                return true;
-            }
+            printf("Oh no, we hit something \n");
+            //return true, game is now over
+            return true;
+        }
+                
+        i+=1;
+
+        if (i == player.x + player.x_size) {
+            i = player.x;
+            j+=1;
+        }
+
+        if (j >= player.y + player.y_size){
+            return false;
         }
     }
+
     return false;
 }
+
 
 /* ///////////////////////////////////////////////////// Obstacle spawning ////////////////////////////////////////////// */
 struct Obstacle create_obstacle()
@@ -570,17 +597,16 @@ struct Obstacle create_obstacle()
     struct Obstacle data;
     data.x = VGA_X_MAX;
     data.y = rand () % VGA_Y_MAX;
-    data.x_speed = -5;
+    data.x_speed = -2;
     data.height = 45;
     data.width = 75;
 
     return data;
 }
 //randomly spawns obstacles and inserts into a linked list
-struct node* spawn_obstacle(struct node* head)
-{
+struct node* spawn_obstacle(struct node* head){
     //Liklihood to spawn obstacle
-    int num = rand() % 35;
+    int num = rand() % 50;
 
     if(num == 3)
     {
@@ -642,7 +668,7 @@ struct node* draw_obstacle(struct node* head) {
         }
         else{   
             //clears old obstacles
-            //clear_obstacle_helper(curr, 2);
+            clear_obstacle_helper(curr, 2);
 
             curr->data.x +=  curr->data.x_speed;
             //Draws new obstacle positions 
@@ -703,8 +729,9 @@ void clear_obstacle_helper(struct node* curr, int offset){
         if(i <= VGA_X_MAX && i >= VGA_X_MIN && j >= VGA_Y_MIN  && j <= VGA_Y_MAX)
         {
             short int color = return_color(i,j);
-            plot_pixel( 0 + i, j, 0);
-            
+            if(color != p){
+                plot_pixel( 0 + i, j, p);
+            }
         }
                 
         i+=1;
@@ -779,7 +806,7 @@ void clear_player(int x, int y, int x_size, int y_size, int offset){
                 
         if(i <= VGA_X_MAX && i >= VGA_X_MIN && j >= VGA_Y_MIN  && j <= VGA_Y_MAX)
         {
-            short int color = 0x001F;//return_color(i,j);
+            short int color = return_color(i,j);
             if(color != p){
                 plot_pixel( 0 + i, j, p);
             }
@@ -801,7 +828,24 @@ void clear_player(int x, int y, int x_size, int y_size, int offset){
 
 //clears screen to background
 void clear_screen(){
-    memset((short int*) pixel_buffer_start, 0x001F, 245760); 
+    //Sky & background
+    int i = 0, j = 0;	
+	for (int k = 0 ; k < 320 * 240 * 2 - 1; k+= 2) {
+        int red = ((OceanBG_map[k + 1] & 0xF8) >> 3) << 11;
+        int green  = (((OceanBG_map[k] & 0xE0) >> 5)) | ((OceanBG_map[k+1] & 0x7) << 3) ;		                
+        int blue = (OceanBG_map[k] & 0x1f);			
+                
+		short int p = red | ( (green << 5) | blue);
+		
+		plot_pixel( 0 + i, j, p);
+		
+		i+=1;
+
+		if (i == 320) {
+			i = 0;
+			j+=1;
+		}
+	}
 }
 
 //plots pixels on VGA
