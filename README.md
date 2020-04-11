@@ -1,6 +1,9 @@
 # VGA-Runner
 Infinite Runner Game on VGA \
-Made by: Edwin Zhang, Malhar Shah \
+Made by: Edwin Zhang, Malhar Shah
+
+For more information, please read:ECE243-Final-Project-Description.pdf 
+https://github.com/mshah0722/VGA-Runner/blob/master/ECE243-Final-Project-Description.pdf
 
 ## How to run:
 Run on: https://cpulator.01xz.net/?sys=arm-de1soc&d_audio=48000 
