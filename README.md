@@ -1,6 +1,7 @@
 # VGA-Runner
 Infinite Runner Game on VGA \
-Made by: Edwin Zhang, Malhar Shah \\
+Made by: Edwin Zhang, Malhar Shah \
+
 ## How to run:
 Run on: https://cpulator.01xz.net/?sys=arm-de1soc&d_audio=48000 
 1) Once on cpulator, change the mode to C and deleted any default code 
